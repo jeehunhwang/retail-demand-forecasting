@@ -10,6 +10,8 @@ This project builds and evaluates time-series forecasting models to predict reta
 - Jee Hun (Jimmy) Hwang  
 - Lei (Larry) Lin
 
+---
+
 ## 📦 Project Overview
 Retail demand is diverse even within the same category. Sub-category forecasting improves planning accuracy and supports data-driven decisions in replenishment cycles, stock allocation, and marketing campaigns.
 
