@@ -1917,11 +1917,7 @@ furn_plot <- furn_trn_fc |>
     x = "Month"
   )
 
-# return useful objects
-list(
-  metrics_tbl = furn_metrics_tbl,
-  plot = furn_plot
-)
+furn_plot
 
 ```
 
@@ -1996,10 +1992,7 @@ metrics_combined_tbl <- metrics_combined |>
     subtitle = "Non Box-Cox and Per-group Guerrero Box–Cox"
   )
 
-# return useful objects
-list(
-  metrics_combined_tbl = metrics_combined_tbl
-)
+metrics_combined_tbl
 ```
 
 ## 11) Best model Metrics: Forecast ets_log1p for Bookcases and Furnishings sub-category only, tslm_bc for Chairs and Tables sub-categories only
@@ -2232,11 +2225,7 @@ tech_plot <- tech_trn_fc |>
     x = "Month"
   )
 
-# return useful objects
-list(
-  metrics_tbl = tech_metrics_tbl,
-  plot = tech_plot
-)
+tech_plot
 
 ```
 
@@ -2310,10 +2299,7 @@ metrics_combined_tbl <- metrics_combined |>
     subtitle = "Non Box-Cox and Per-group Guerrero Box–Cox"
   )
 
-# return useful objects
-list(
-  metrics_combined_tbl = metrics_combined_tbl
-)
+metrics_combined_tbl
 ```
 
 ## 11) Best model Metrics: Identify and display best models for each Technology sub-category
@@ -2409,7 +2395,15 @@ combined_models <- bind_rows(
   best_tech_models
 )
 
-combined_models
+combined_models |>
+  knitr::kable(
+        digits = 2,
+        col.names = c("Model", "Sub-Category", "Type", "ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "RMSSE", "ACF1", "Transform")
+        ) |>
+  kable_styling(
+        bootstrap_options = c("striped", "condensed"),
+        full_width = FALSE
+        )
 ```
 
 ```{r}
