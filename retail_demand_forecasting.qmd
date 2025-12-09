@@ -1,0 +1,2468 @@
+---
+title: "Appendix"
+author: "Michael Ha, Jee Hun (Jimmy) Hwang, Lei (Larry) Lin"
+date: "2025-10-30"
+output: pdf
+---
+
+## Import Libraries
+
+```{r setup, include=FALSE}
+#| echo: false
+
+library(tidyverse)
+library(here)
+library(readxl)
+library(fpp3)
+library(knitr)
+library(kableExtra)
+library(patchwork)
+library(scales)
+```
+
+## Import Dataset
+
+```{r}
+sales <- read_excel(here("C:/Users/jimmy/Desktop/ads506/final/shop.xlsx"))
+sales
+```
+
+```{r}
+sales |>
+  select(Category, `Sub-Category`) |>
+  distinct() |>
+  arrange(Category, `Sub-Category`)
+```
+
+## EDA
+
+```{r}
+# Histogram of purchases by "Category"
+sales |>
+  group_by(Category) |>
+  summarise(units_sold = sum(Quantity), .groups = "drop") |>
+  ggplot(aes(x = reorder(Category, units_sold), y = units_sold)) +
+  geom_col(fill = "blue") +
+  coord_flip() +
+  labs(
+    title = "Total Quantity Sold by Category",
+    x = "Category",
+    y = "Quantity"
+  )
+
+```
+
+```{r}
+# Histogram of sales by "Category"
+sales |>
+  group_by(Category) |>
+  summarise(total_sales = sum(Sales, na.rm = TRUE)) |>
+  ggplot(aes(x = reorder(Category, total_sales), y = total_sales)) +
+  geom_col(fill = "blue") +
+  coord_flip() +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Total Sales - Category",
+    x = "Category",
+    y = "Sales ($)"
+  )
+```
+
+```{r}
+# Histogram of Profit by "Category"
+sales |>
+  group_by(Category) |>
+  summarise(total_sales = sum(Profit, na.rm = TRUE)) |>
+  ggplot(aes(x = reorder(Category, total_sales), y = total_sales)) +
+  geom_col(fill = "blue") +
+  coord_flip() +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Total Profit - Category",
+    x = "Category",
+    y = "Sales ($)"
+  )
+```
+
+```{r}
+# Histogram of purchases by "Sub-Category"
+sales |>
+  group_by(`Sub-Category`) |>
+  summarise(units_sold = sum(Quantity), .groups = "drop") |>
+  ggplot(aes(x = reorder(`Sub-Category`, units_sold), y = units_sold)) +
+  geom_col(fill = "blue") +
+  coord_flip() +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Total Purchases - Sub-Category",
+    x = "Sub-Category",
+    y = "Quantity"
+  )
+```
+
+```{r}
+# Histogram of sales by "Sub-Category"
+sales |>
+  group_by(`Sub-Category`) |>
+  summarise(total_sales = sum(Sales, na.rm = TRUE)) |>
+  ggplot(aes(x = reorder(`Sub-Category`, total_sales), y = total_sales)) +
+  geom_col(fill = "blue") +
+  coord_flip() +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Total Sales - Sub-Category",
+    x = "Sub-Category",
+    y = "Sales ($)"
+  )
+```
+
+```{r}
+# Histogram of Profit by "Sub-Category"
+sales |>
+  group_by(`Sub-Category`) |>
+  summarise(total_sales = sum(Profit, na.rm = TRUE)) |>
+  ggplot(aes(x = reorder(`Sub-Category`, total_sales), y = total_sales)) +
+  geom_col(fill = "blue") +
+  coord_flip() +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Total Profit - Sub-Category",
+    x = "Sub-Category",
+    y = "Sales ($)"
+  )
+```
+
+```{r}
+# Boxplot of Sales by Category
+sales |>
+  ggplot(aes(x = Category, y = Sales)) +
+  geom_boxplot(fill = "blue") +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title = "Boxplot of Sales - Category",
+    x = "Category",
+    y = "Sales ($)"
+  )
+```
+
+```{r}
+# Description of Sales by Category
+sales_by_cat <- sales |>
+  group_by(Category) |>
+  summarise(
+    obs = n(),
+    mean = mean(Sales, na.rm = TRUE),
+    median = median(Sales, na.rm = TRUE),
+    mode = {
+      x <- Sales[!is.na(Sales)]
+      ux <- unique(x)
+      ux[which.max(tabulate(match(x, ux)))]
+    },
+    sd = sd(Sales, na.rm = TRUE),
+    min = min(Sales, na.rm = TRUE),
+    max = max(Sales, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(desc(obs)) |>
+  knitr::kable(
+        digits = 2,
+        col.names = c("Category", "obs", "mean", "median", "mode", "sd", "min", "max"),
+        caption = "Description of Sales - Category"
+        ) |>
+    kable_styling(
+        bootstrap_options = c("striped", "condensed"),
+        full_width = FALSE
+    )
+
+sales_by_cat
+```
+
+```{r}
+# Boxplot of Sales by Sub-Category
+sales |>
+  ggplot(aes(x = `Sub-Category`, y = Sales)) +
+  geom_boxplot(fill = "blue") +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title = "Boxplot of Sales - Sub-Category",
+    x = "Category",
+    y = "Sales ($)"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+# Description of Sales by Sub-Category
+sales_by_subcat <- sales |>
+  group_by(`Sub-Category`) |>
+  summarise(
+    obs = n(),
+    mean = mean(Sales, na.rm = TRUE),
+    median = median(Sales, na.rm = TRUE),
+    mode = {
+      x <- Sales[!is.na(Sales)]
+      ux <- unique(x)
+      ux[which.max(tabulate(match(x, ux)))]
+    },
+    sd = sd(Sales, na.rm = TRUE),
+    min = min(Sales, na.rm = TRUE),
+    max = max(Sales, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(desc(obs)) |>
+  knitr::kable(
+        digits = 2,
+        col.names = c("Category", "obs", "mean", "median", "mode", "sd", "min", "max"),
+        caption = "Description of Sales - Sub-Category"
+        ) |>
+    kable_styling(
+        bootstrap_options = c("striped", "condensed"),
+        full_width = FALSE
+    )
+
+sales_by_subcat
+```
+
+```{r}
+sales |>
+  filter(`Sub-Category` == "Copiers",
+         Sales == max(Sales[`Sub-Category` == "Copiers"], na.rm = TRUE))
+```
+
+```{r}
+sales |>
+  ggplot(aes(x = `Category`, y = Quantity)) +
+  geom_boxplot(fill = "blue") +
+  labs(
+    title = "Boxplot of Quantity Sold - Category",
+    x = "Category",
+    y = "Quantity"
+  )
+```
+
+```{r}
+sales |>
+  ggplot(aes(x = `Sub-Category`, y = Quantity)) +
+  geom_boxplot(fill = "blue") +
+  labs(
+    title = "Boxplot of Quantity Sold - Sub-Category",
+    x = "Sub-Category",
+    y = "Quantity"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+sales |>
+  mutate(isDiscount = ifelse(Discount > 0, "Discount", "No Discount")) |>
+  count(Category, isDiscount) |>
+  ggplot(aes(x = Category, y = n, fill = isDiscount)) +
+  geom_col(position = "dodge") +
+  coord_flip() +
+  labs(
+    title = "Discount vs No Discount - Category",
+    x = "Category",
+    y = "Purchases",
+    fill = "Legend"
+  )
+```
+
+```{r}
+sales |>
+  mutate(isDiscount = ifelse(Discount > 0, "Discount", "No Discount")) |>
+  count(`Sub-Category`, isDiscount) |>
+  ggplot(aes(x = `Sub-Category`, y = n, fill = isDiscount)) +
+  geom_col(width = 0.5, position = position_dodge()) +
+  coord_flip() +
+  labs(
+    title = "Discount vs No Discount - Sub-Category",
+    x = "Sub-Category",
+    y = "Purchases",
+    fill = "Legend"
+  )
+```
+
+## Check for Missing Data
+
+```{r}
+colSums(is.na(sales))
+```
+
+```{r}
+# Remove "Postal Code" feature since it has missing data and is not relevant
+sales |> select(-`Postal Code`)
+```
+
+## Create tsibble
+
+```{r}
+sales <- sales |>
+  mutate(`Order Date` = as.Date(`Order Date`))
+
+sales_ts <- sales |>
+  group_by(`Sub-Category`, `Order Date`) |>
+  summarise(Quantity = sum(Quantity), .groups = "drop") |>
+  as_tsibble(
+    key = `Sub-Category`,
+    index = `Order Date`
+  )
+
+sales_ts
+```
+
+```{r}
+sales_ts |>
+  autoplot(Quantity) +
+  labs(
+    title = "Monthly Quantity - Sub-Category",
+    x = "Month",
+    y = "Quantity"
+  )
+```
+
+```{r}
+sales_ts
+```
+
+# Category EDA Continues
+
+```{r}
+# Category Tsibble
+sales_cat_ts <- sales |>
+  group_by(`Category`, `Order Date`) |>
+  summarise(Quantity = sum(Quantity), .groups = "drop") |>
+  as_tsibble(
+    key = `Category`,
+    index = `Order Date`
+  )
+
+# Furniture Tsibble
+furn_m <- sales_cat_ts |> 
+  filter(`Category` == 'Furniture') |> 
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity)) |> 
+  fill_gaps(Quantity = 0)
+
+# Office Supplies Tsibble
+office_m <- sales_cat_ts |> 
+  filter(`Category` == "Office Supplies") |>
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity)) |>
+  fill_gaps(Quantity = 0)
+
+# Technology Tsibble
+tech_m <- sales_cat_ts |>
+  filter(`Category` == "Technology") |>
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity), .groups = "drop") |>
+  fill_gaps(Quantity = 0)
+```
+
+# All 3 Category Time Series Plotting Together
+
+```{r}
+# Overlay monthly series for three categories in one plot
+cats <- c("Furniture", "Office Supplies", "Technology")
+cols <- c("#2c7fb8", "#238b45", "#d95f02")
+names(cols) <- cats
+
+combined_m <- sales_cat_ts |>
+  filter(`Category` %in% cats) |>
+  group_by(`Category`) |>                        # <<-- keep Category for plotting
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity), .groups = "drop") |>
+  fill_gaps(Quantity = 0) |>
+  mutate(Month = as.Date(Month))
+
+p_combined <- combined_m |>
+  ggplot(aes(x = Month, y = Quantity, color = `Category`, group = `Category`)) +
+  geom_line(size = 0.9, alpha = 0.9) +
+  geom_smooth(aes(fill = `Category`), method = "loess", se = FALSE, linetype = "dashed", size = 0.8, show.legend = FALSE) +
+  scale_color_manual(values = cols) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_date(date_breaks = "6 months", date_labels = "%Y-%b", expand = expansion(mult = c(0.01, 0.02))) +
+  labs(
+    title = "Monthly Sold Quantity — Selected Categories",
+    subtitle = "Furniture, Office Supplies, and Technology (with LOESS trends)",
+    x = "Month",
+    y = "Quantity Sold",
+    color = "Category",
+    caption = "Source: shop_formal.xlsx"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(size = 11, margin = margin(b = 8)),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.minor = element_blank(),
+    legend.position = "top"
+  )
+
+p_combined
+```
+
+# Category: Office Supplies
+
+## 1) Sub-Category: Appliances
+
+```{r}
+# Appliances
+appliances_monthly <- sales_ts |>
+  filter(`Sub-Category` == "Appliances") |>
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity, na.rm = TRUE)) |>
+  tidyr::complete(Month = seq(min(Month), max(Month), by = 1),
+                  fill = list(Quantity = 0)) |>
+  as_tsibble(index = Month)
+
+# Time series plot
+appliances_monthly |>
+  autoplot(Quantity) +
+  labs(
+    title = "Appliances - Monthly Quantity",
+    x = "Month",
+    y = "Quantity"
+  )
+```
+
+```{r}
+# Training set
+training_cutoff <- yearmonth(appliances_monthly$Month |> max() |> as_date() - years(1))
+
+appliances_trn <- appliances_monthly |>
+  filter(Month <= training_cutoff)
+```
+
+```{r}
+# Log transformation
+appliances_prepped <- appliances_trn |>
+  mutate(log_v = log(Quantity),
+         D12 = difference(log_v, lag = 12),
+         d1 = difference(log_v, lag = 1),
+         D12d1 = difference(D12, lag = 1))
+
+# D12d1 plot
+appliances_prepped |>
+  autoplot(D12d1)
+
+# D12d1 stationarity test
+appliances_prepped |>
+  features(D12d1, c(unitroot_kpss, unitroot_ndiffs, unitroot_nsdiffs))
+```
+
+```{r}
+# ACF/PCF plots
+appliances_prepped |>
+  gg_tsdisplay(
+    D12d1, plot_type = "partial"
+  ) +
+  labs(title = "ACF & PACF Plots - Appliances")
+```
+
+```{r}
+# Model
+appliances_fit <- appliances_trn |>
+  model(
+    arima_v = ARIMA(Quantity ~ pdq(0, 1, 0) + PDQ(0, 1, 1, period = 12)),
+    auto_v = ARIMA(Quantity),
+    arima_logv = ARIMA(log(Quantity) ~ pdq(0, 1, 0) + PDQ(0, 1, 1, period = 12)),
+    auto_logv = ARIMA(log(Quantity))
+  )
+
+appliances_fit |> t()
+```
+
+```{r}
+# Residuals
+appliances_fit |>
+  select(arima_v) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Applicances Residuals - No Transformation"
+  )
+
+appliances_fit |>
+  select(arima_logv) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Appliances Residuals - Log Transformation"
+  )
+
+# Perform a ljung-box test with sufficient lags
+appliances_fit["auto_v"] |>
+    augment() |>
+    features(.innov, c(ljung_box, box_pierce), lag = 24) |>
+    select(.model, contains("pvalue"))
+```
+
+```{r}
+# Report metrics
+glance(appliances_fit) |>
+  select(.model, AICc) |>
+  left_join(
+    appliances_fit |> accuracy() |> select(.model, RMSE)
+    ) |>
+  arrange(RMSE)
+```
+
+```{r}
+# Best fit
+appliances_best_fit <- appliances_trn |>
+  model(
+    auto_v = ARIMA(Quantity)
+  )
+
+# Forecast best fit
+appliances_fc <- appliances_best_fit |>
+  forecast(h = "12 months")
+
+appliances_fc |>
+  autoplot(
+    appliances_trn |> filter(year(Month) >= 2014)
+    ) +
+    labs(
+      title = "Forecast of Appliances - 12 Months (ARIMA)",
+      x = "Month",
+      y = "Quantity"
+      )
+```
+
+## 2) Sub-Category: Art
+
+```{r}
+# Art
+art_monthly <- sales_ts |>
+  filter(`Sub-Category` == "Art") |>
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity, na.rm = TRUE)) |>
+  tidyr::complete(Month = seq(min(Month), max(Month), by = 1),
+                  fill = list(Quantity = 0)) |>
+  as_tsibble(index = Month)
+
+# Time series plot
+art_monthly |>
+  autoplot(Quantity) +
+  labs(
+    title = "Art - Monthly Quantity",
+    x = "Month",
+    y = "Quantity"
+  )
+```
+
+```{r}
+art_trn <- art_monthly |>
+  filter(Month <= training_cutoff)
+```
+
+```{r}
+# Log transformation
+art_prepped <- art_trn |>
+  mutate(log_v = log(Quantity),
+         D12 = difference(log_v, lag = 12),
+         d1 = difference(log_v, lag = 1),
+         D12d1 = difference(D12, lag = 1))
+
+# D12d1 plot
+art_prepped |>
+  autoplot(D12d1)
+
+# D12d1 stationarity test
+art_prepped |>
+  features(D12d1, c(unitroot_kpss, unitroot_ndiffs, unitroot_nsdiffs))
+```
+
+```{r}
+# ACF/PCF plots
+art_prepped |>
+  gg_tsdisplay(
+    D12d1, plot_type = "partial"
+  ) +
+  labs(title = "ACF & PACF Plots - Art")
+```
+
+```{r}
+# Model
+art_fit <- art_trn |>
+  model(
+    arima_v = ARIMA(Quantity ~ pdq(2, 1, 1) + PDQ(0, 1, 0, period = 12)),
+    auto_v = ARIMA(Quantity),
+    arima_logv = ARIMA(log(Quantity) ~ pdq(2, 1, 1) + PDQ(0, 1, 0, period = 12)),
+    auto_logv = ARIMA(log(Quantity))
+  )
+
+art_fit |> t()
+```
+
+```{r}
+# Residuals
+art_fit |>
+  select(arima_v) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Art Residuals - No Transformation"
+  )
+
+art_fit |>
+  select(arima_logv) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Art Residuals - Log Transformation"
+  )
+
+# Perform a ljung-box test with sufficient lags
+art_fit["arima_logv"] |>
+    augment() |>
+    features(.innov, c(ljung_box, box_pierce), lag = 24) |>
+    select(.model, contains("pvalue"))
+```
+
+```{r}
+# Report metrics
+glance(art_fit) |>
+  select(.model, AICc) |>
+  left_join(
+    art_fit |> accuracy() |> select(.model, RMSE)
+    ) |>
+  arrange(RMSE)
+```
+
+```{r}
+# Best fit
+art_best_fit <- art_trn |>
+  model(
+    auto_logv = ARIMA(log(Quantity))
+  )
+
+# Forecast best fit
+art_fc <- art_best_fit |>
+  forecast(h = "12 months")
+
+art_fc |>
+  autoplot(
+    art_trn |> filter(year(Month) >= 2014)
+    ) +
+    labs(
+      title = "Forecast of Art - 12 Months (ARIMA)",
+      x = "Month",
+      y = "Quantity"
+      )
+```
+
+## 3) Sub-Category: Binders
+
+```{r}
+# Binders
+binders_monthly <- sales_ts |>
+  filter(`Sub-Category` == "Binders") |>
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity, na.rm = TRUE)) |>
+  tidyr::complete(Month = seq(min(Month), max(Month), by = 1),
+                  fill = list(Quantity = 0)) |>
+  as_tsibble(index = Month)
+
+# Time series plot
+binders_monthly |>
+  autoplot(Quantity) +
+  labs(
+    title = "Binders - Monthly Quantity",
+    x = "Month",
+    y = "Quantity"
+  )
+```
+
+```{r}
+binders_trn <- binders_monthly |>
+  filter(Month <= training_cutoff)
+```
+
+```{r}
+# Log transformation
+binders_prepped <- binders_trn |>
+  mutate(log_v = log(Quantity),
+         D12 = difference(log_v, lag = 12),
+         d1 = difference(log_v, lag = 1),
+         D12d1 = difference(D12, lag = 1))
+
+# D12d1 plot
+binders_prepped |>
+  autoplot(D12d1)
+
+# D12d1 stationarity test
+binders_prepped |>
+  features(D12d1, c(unitroot_kpss, unitroot_ndiffs, unitroot_nsdiffs))
+```
+
+```{r}
+# ACF/PCF plots
+binders_prepped |>
+  gg_tsdisplay(
+    D12d1, plot_type = "partial"
+  ) +
+  labs(title = "ACF & PACF Plots - Binders")
+```
+
+```{r}
+# Model
+binders_fit <- binders_trn |>
+  model(
+    arima_v = ARIMA(Quantity ~ pdq(1, 1, 2) + PDQ(0, 1, 1, period = 12)),
+    auto_v = ARIMA(Quantity),
+    arima_logv = ARIMA(log(Quantity) ~ pdq(1, 1, 2) + PDQ(0, 1, 1, period = 12)),
+    auto_logv = ARIMA(log(Quantity))
+  )
+
+binders_fit |> t()
+```
+
+```{r}
+# Residuals
+binders_fit |>
+  select(arima_v) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Binders Residuals - No Transformation"
+  )
+
+binders_fit |>
+  select(arima_logv) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Binders Residuals - Log Transformation"
+  )
+
+# Perform a ljung-box test with sufficient lags
+binders_fit["arima_logv"] |>
+    augment() |>
+    features(.innov, c(ljung_box, box_pierce), lag = 24) |>
+    select(.model, contains("pvalue"))
+```
+
+```{r}
+# Report metrics
+glance(binders_fit) |>
+  select(.model, AICc) |>
+  left_join(
+    binders_fit |> accuracy() |> select(.model, RMSE)
+    ) |>
+  arrange(RMSE)
+```
+
+```{r}
+# Best fit
+binders_best_fit <- binders_trn |>
+  model(
+    arima_logv = ARIMA(log(Quantity) ~ pdq(1, 1, 2) + PDQ(0, 1, 1, period = 12))
+  )
+
+# Forecast best fit
+binders_fc <- binders_best_fit |>
+  forecast(h = "12 months")
+
+binders_fc |>
+  autoplot(
+    binders_trn |> filter(year(Month) >= 2014)
+    ) +
+    labs(
+      title = "Forecast of Binders - 12 Months (ARIMA)",
+      x = "Month",
+      y = "Quantity"
+      )
+```
+
+## 4) Sub-Category: Envelopes
+
+```{r}
+# Envelopes
+envelopes_monthly <- sales_ts |>
+  filter(`Sub-Category` == "Envelopes") |>
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity, na.rm = TRUE)) |>
+  tidyr::complete(Month = seq(min(Month), max(Month), by = 1),
+                  fill = list(Quantity = 0)) |>
+  as_tsibble(index = Month)
+
+# Time series plot
+envelopes_monthly |>
+  autoplot(Quantity) +
+  labs(
+    title = "Envelopes - Monthly Quantity",
+    x = "Month",
+    y = "Quantity"
+  )
+```
+
+```{r}
+envelopes_trn <- envelopes_monthly |>
+  filter(Month <= training_cutoff)
+```
+
+```{r}
+# Log transformation
+envelopes_prepped <- envelopes_trn |>
+  mutate(log_v = log(Quantity),
+         D12 = difference(log_v, lag = 12),
+         d1 = difference(log_v, lag = 1),
+         D12d1 = difference(D12, lag = 1))
+
+# D12d1 plot
+envelopes_prepped |>
+  autoplot(D12d1)
+
+# D12d1 stationarity test
+envelopes_prepped |>
+  features(D12d1, c(unitroot_kpss, unitroot_ndiffs, unitroot_nsdiffs))
+```
+
+```{r}
+# p-value showing as NaN due to too many 0's in Envelope Quantity so we will use BoxCox instead
+lambda_bc <- envelopes_trn |>
+  features(Quantity, features = guerrero) |>
+  pull(lambda_guerrero)
+
+envelopes_prepped <- envelopes_trn |>
+  mutate(
+    bc = box_cox(Quantity + 1, lambda_bc),
+    D12_bc = difference(bc, lag = 12),
+    d1_bc = difference(bc, lag = 1),
+    D12d1_bc = difference(D12_bc, lag = 1)
+  )
+
+# D12d1 plot
+envelopes_prepped |>
+  autoplot(D12d1_bc)
+
+# D12d1 stationarity test
+envelopes_prepped |>
+  features(D12d1_bc, c(unitroot_kpss, unitroot_ndiffs, unitroot_nsdiffs))
+```
+
+```{r}
+# ACF/PCF plots
+envelopes_prepped |>
+  gg_tsdisplay(
+    D12d1_bc, plot_type = "partial"
+  ) +
+  labs(title = "ACF & PACF Plots - Envelopes")
+```
+
+```{r}
+# Model
+envelopes_fit <- envelopes_trn |>
+  model(
+    arima_v = ARIMA(Quantity ~ pdq(1, 1, 2) + PDQ(0, 1, 1, period = 12)),
+    auto_v = ARIMA(Quantity),
+    arima_bcv = ARIMA(box_cox(Quantity, feasts::guerrero(Quantity)) ~
+                        pdq(1, 1, 2) + PDQ(0, 1, 1, period = 12)),
+    auto_bcv = ARIMA(box_cox(Quantity, feasts::guerrero(Quantity))
+    )
+  )
+
+envelopes_fit |> t()
+```
+
+```{r}
+# Residuals
+envelopes_fit |>
+  select(arima_v) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Envelopes Residuals - No Transformation"
+  )
+
+envelopes_fit |>
+  select(arima_bcv) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Envelopes Residuals - BoxCox Transformation"
+  )
+
+# Perform a ljung-box test with sufficient lags
+envelopes_fit["arima_bcv"] |>
+    augment() |>
+    features(.innov, c(ljung_box, box_pierce), lag = 24) |>
+    select(.model, contains("pvalue"))
+```
+
+```{r}
+# Report metrics
+glance(envelopes_fit) |>
+  select(.model, AICc) |>
+  left_join(
+    envelopes_fit |> accuracy() |> select(.model, RMSE)
+    ) |>
+  arrange(RMSE)
+```
+
+```{r}
+# Best fit (use BoxCox transformation for stationarity)
+envelopes_best_fit <- envelopes_trn |>
+  model(
+    arima_bcv = ARIMA(box_cox(Quantity, feasts::guerrero(Quantity)) ~
+                        pdq(1, 1, 2) + PDQ(0, 1, 1, period = 12))
+  )
+
+# Forecast best fit
+envelopes_fc <- envelopes_best_fit |>
+  forecast(h = "12 months")
+
+envelopes_fc |>
+  autoplot(
+    envelopes_trn |> filter(year(Month) >= 2014)
+    ) +
+    labs(
+      title = "Forecast of Envelopes - 12 Months (ARIMA)",
+      x = "Month",
+      y = "Quantity"
+      )
+```
+
+## 5) Sub-Category: Fasteners
+
+```{r}
+# Fasteners
+fasteners_monthly <- sales_ts |>
+  filter(`Sub-Category` == "Fasteners") |>
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity, na.rm = TRUE)) |>
+  tidyr::complete(Month = seq(min(Month), max(Month), by = 1),
+                  fill = list(Quantity = 0)) |>
+  as_tsibble(index = Month)
+
+# Time series plot
+fasteners_monthly |>
+  autoplot(Quantity) +
+  labs(
+    title = "Fasteners - Monthly Quantity",
+    x = "Month",
+    y = "Quantity"
+  )
+```
+
+```{r}
+fasteners_trn <- fasteners_monthly |>
+  filter(Month <= training_cutoff)
+```
+
+```{r}
+# Log transformation
+fasteners_prepped <- fasteners_trn |>
+  mutate(log_v = log(Quantity),
+         D12 = difference(log_v, lag = 12),
+         d1 = difference(log_v, lag = 1),
+         D12d1 = difference(D12, lag = 1))
+
+# D12d1 plot
+fasteners_prepped |>
+  autoplot(D12d1)
+
+# D12d1 stationarity test
+fasteners_prepped |>
+  features(D12d1, c(unitroot_kpss, unitroot_ndiffs, unitroot_nsdiffs))
+```
+
+```{r}
+# p-value showing as NaN due to too many 0's in Fasteners Quantity so we will use BoxCox instead
+lambda_bc <- fasteners_trn |>
+  features(Quantity, features = guerrero) |>
+  pull(lambda_guerrero)
+
+fasteners_prepped <- fasteners_trn |>
+  mutate(
+    bc = box_cox(Quantity + 1, lambda_bc),
+    D12_bc = difference(bc, lag = 12),
+    d1_bc = difference(bc, lag = 1),
+    D12d1_bc = difference(D12_bc, lag = 1)
+  )
+
+# D12d1 plot
+fasteners_prepped |>
+  autoplot(D12d1_bc)
+
+# D12d1 stationarity test
+fasteners_prepped |>
+  features(D12d1_bc, c(unitroot_kpss, unitroot_ndiffs, unitroot_nsdiffs))
+```
+
+```{r}
+# ACF/PCF plots
+fasteners_prepped |>
+  gg_tsdisplay(
+    D12d1_bc, plot_type = "partial"
+  ) +
+  labs(title = "ACF & PACF Plots - Fasteners")
+```
+
+```{r}
+# Model
+fasteners_fit <- fasteners_trn |>
+  model(
+    arima_v = ARIMA(Quantity ~ pdq(1, 1, 1) + PDQ(0, 1, 0, period = 12)),
+    auto_v = ARIMA(Quantity),
+    arima_bcv = ARIMA(box_cox(Quantity, feasts::guerrero(Quantity)) ~
+                        pdq(1, 1, 1) + PDQ(0, 1, 0, period = 12)),
+    auto_bcv = ARIMA(box_cox(Quantity, feasts::guerrero(Quantity))
+    )
+  )
+
+fasteners_fit |> t()
+```
+
+```{r}
+# Residuals
+fasteners_fit |>
+  select(arima_v) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Fasteners Residuals - No Transformation"
+  )
+
+fasteners_fit |>
+  select(arima_bcv) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Fasteners Residuals - BoxCox Transformation"
+  )
+
+# Perform a ljung-box test with sufficient lags
+fasteners_fit["arima_bcv"] |>
+    augment() |>
+    features(.innov, c(ljung_box, box_pierce), lag = 24) |>
+    select(.model, contains("pvalue"))
+```
+
+```{r}
+# Report metrics
+glance(fasteners_fit) |>
+  select(.model, AICc) |>
+  left_join(
+    fasteners_fit |> accuracy() |> select(.model, RMSE)
+    ) |>
+  arrange(RMSE)
+```
+
+```{r}
+# Best fit (use BoxCox transformation for stationarity)
+fasteners_best_fit <- fasteners_trn |>
+  model(
+    arima_bcv = ARIMA(box_cox(Quantity, feasts::guerrero(Quantity)) ~
+                        pdq(1, 1, 1) + PDQ(0, 1, 0, period = 12))
+  )
+
+# Forecast best fit
+fasteners_fc <- fasteners_best_fit |>
+  forecast(h = "12 months")
+
+fasteners_fc |>
+  autoplot(
+    fasteners_trn |> filter(year(Month) >= 2014)
+    ) +
+    labs(
+      title = "Forecast of Fasteners - 12 Months (ARIMA)",
+      x = "Month",
+      y = "Quantity"
+      )
+```
+
+## 6) Sub-Category: Labels
+
+```{r}
+# Labels
+labels_monthly <- sales_ts |>
+  filter(`Sub-Category` == "Labels") |>
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity, na.rm = TRUE)) |>
+  tidyr::complete(Month = seq(min(Month), max(Month), by = 1),
+                  fill = list(Quantity = 0)) |>
+  as_tsibble(index = Month)
+
+# Time series plot
+labels_monthly |>
+  autoplot(Quantity) +
+  labs(
+    title = "Labels - Monthly Quantity",
+    x = "Month",
+    y = "Quantity"
+  )
+```
+
+```{r}
+labels_trn <- labels_monthly |>
+  filter(Month <= training_cutoff)
+```
+
+```{r}
+# Log transformation
+labels_prepped <- labels_trn |>
+  mutate(log_v = log(Quantity),
+         D12 = difference(log_v, lag = 12),
+         d1 = difference(log_v, lag = 1),
+         D12d1 = difference(D12, lag = 1))
+
+# D12d1 plot
+labels_prepped |>
+  autoplot(D12d1)
+
+# D12d1 stationarity test
+labels_prepped |>
+  features(D12d1, c(unitroot_kpss, unitroot_ndiffs, unitroot_nsdiffs))
+```
+
+```{r}
+# ACF/PCF plots
+labels_prepped |>
+  gg_tsdisplay(
+    D12d1, plot_type = "partial"
+  ) +
+  labs(title = "ACF & PACF Plots - Labels")
+```
+
+```{r}
+# Model
+labels_fit <- labels_trn |>
+  model(
+    arima_v = ARIMA(Quantity ~ pdq(1, 1, 1) + PDQ(0, 1, 0, period = 12)),
+    auto_v = ARIMA(Quantity),
+    arima_logv = ARIMA(log(Quantity) ~ pdq(1, 1, 1) + PDQ(0, 1, 0, period = 12)),
+    auto_logv = ARIMA(log(Quantity))
+  )
+
+labels_fit |> t()
+```
+
+```{r}
+# Residuals
+labels_fit |>
+  select(arima_v) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Labels Residuals - No Transformation"
+  )
+
+labels_fit |>
+  select(arima_logv) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Labels Residuals - Log Transformation"
+  )
+
+# Perform a ljung-box test with sufficient lags
+labels_fit["auto_v"] |>
+    augment() |>
+    features(.innov, c(ljung_box, box_pierce), lag = 24) |>
+    select(.model, contains("pvalue"))
+```
+
+```{r}
+# Report metrics
+glance(labels_fit) |>
+  select(.model, AICc) |>
+  left_join(
+    labels_fit |> accuracy() |> select(.model, RMSE)
+    ) |>
+  arrange(RMSE)
+```
+
+```{r}
+# Best fit (use log transformation for stationarity)
+labels_best_fit <- labels_trn |>
+  model(
+    arima_logv = ARIMA(log(Quantity) ~ pdq(1, 1, 1) + PDQ(0, 1, 0, period = 12))
+  )
+
+# Forecast best fit
+labels_fc <- labels_best_fit |>
+  forecast(h = "12 months")
+
+labels_fc |>
+  autoplot(
+    labels_trn |> filter(year(Month) >= 2014)
+    ) +
+    labs(
+      title = "Forecast of Labels - 12 Months (ARIMA)",
+      x = "Month",
+      y = "Quantity"
+      )
+```
+
+## 7) Sub-Category: Paper
+
+```{r}
+# Paper
+paper_monthly <- sales_ts |>
+  filter(`Sub-Category` == "Paper") |>
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity, na.rm = TRUE)) |>
+  tidyr::complete(Month = seq(min(Month), max(Month), by = 1),
+                  fill = list(Quantity = 0)) |>
+  as_tsibble(index = Month)
+
+# Time series plot
+paper_monthly |>
+  autoplot(Quantity) +
+  labs(
+    title = "Paper - Monthly Quantity",
+    x = "Month",
+    y = "Quantity"
+  )
+```
+
+```{r}
+paper_trn <- paper_monthly |>
+  filter(Month <= training_cutoff)
+```
+
+```{r}
+# Log transformation
+paper_prepped <- paper_trn |>
+  mutate(log_v = log(Quantity),
+         D12 = difference(log_v, lag = 12),
+         d1 = difference(log_v, lag = 1),
+         D12d1 = difference(D12, lag = 1))
+
+# D12d1 plot
+paper_prepped |>
+  autoplot(D12d1)
+
+# D12d1 stationarity test
+paper_prepped |>
+  features(D12d1, c(unitroot_kpss, unitroot_ndiffs, unitroot_nsdiffs))
+```
+
+```{r}
+# ACF/PCF plots
+paper_prepped |>
+  gg_tsdisplay(
+    D12d1, plot_type = "partial"
+  ) +
+  labs(title = "ACF & PACF Plots - Paper")
+```
+
+```{r}
+# Model
+paper_fit <- paper_trn |>
+  model(
+    arima_v = ARIMA(Quantity ~ pdq(2, 1, 1) + PDQ(0, 1, 0, period = 12)),
+    auto_v = ARIMA(Quantity),
+    arima_logv = ARIMA(log(Quantity) ~ pdq(2, 1, 1) + PDQ(0, 1, 0, period = 12)),
+    auto_logv = ARIMA(log(Quantity))
+  )
+
+paper_fit |> t()
+```
+
+```{r}
+# Residuals
+paper_fit |>
+  select(arima_v) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Paper Residuals - No Transformation"
+  )
+
+paper_fit |>
+  select(arima_logv) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Paper Residuals - Log Transformation"
+  )
+
+# Perform a ljung-box test with sufficient lags
+paper_fit["auto_v"] |>
+    augment() |>
+    features(.innov, c(ljung_box, box_pierce), lag = 24) |>
+    select(.model, contains("pvalue"))
+```
+
+```{r}
+# Report metrics
+glance(paper_fit) |>
+  select(.model, AICc) |>
+  left_join(
+    labels_fit |> accuracy() |> select(.model, RMSE)
+    ) |>
+  arrange(RMSE)
+```
+
+```{r}
+# Best fit (use log transformation for stationarity)
+paper_best_fit <- paper_trn |>
+  model(
+    arima_logv = ARIMA(log(Quantity) ~ pdq(2, 1, 1) + PDQ(0, 1, 0, period = 12))
+  )
+
+# Forecast best fit
+paper_fc <- paper_best_fit |>
+  forecast(h = "12 months")
+
+paper_fc |>
+  autoplot(
+    paper_trn |> filter(year(Month) >= 2014)
+    ) +
+    labs(
+      title = "Forecast of Paper - 12 Months (ARIMA)",
+      x = "Month",
+      y = "Quantity"
+      )
+```
+
+## 8) Sub-Category: Storage
+
+```{r}
+# Storage
+storage_monthly <- sales_ts |>
+  filter(`Sub-Category` == "Storage") |>
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity, na.rm = TRUE)) |>
+  tidyr::complete(Month = seq(min(Month), max(Month), by = 1),
+                  fill = list(Quantity = 0)) |>
+  as_tsibble(index = Month)
+
+# Time series plot
+storage_monthly |>
+  autoplot(Quantity) +
+  labs(
+    title = "Storage - Monthly Quantity",
+    x = "Month",
+    y = "Quantity"
+  )
+```
+
+```{r}
+storage_trn <- storage_monthly |>
+  filter(Month <= training_cutoff)
+```
+
+```{r}
+# Log transformation
+storage_prepped <- storage_trn |>
+  mutate(log_v = log(Quantity),
+         D12 = difference(log_v, lag = 12),
+         d1 = difference(log_v, lag = 1),
+         D12d1 = difference(D12, lag = 1))
+
+# D12d1 plot
+storage_prepped |>
+  autoplot(D12d1)
+
+# D12d1 stationarity test
+storage_prepped |>
+  features(D12d1, c(unitroot_kpss, unitroot_ndiffs, unitroot_nsdiffs))
+```
+
+```{r}
+# ACF/PCF plots
+storage_prepped |>
+  gg_tsdisplay(
+    D12d1, plot_type = "partial"
+  ) +
+  labs(title = "ACF & PACF Plots - Storage")
+```
+
+```{r}
+# Model
+storage_fit <- storage_trn |>
+  model(
+    arima_v = ARIMA(Quantity ~ pdq(2, 1, 1) + PDQ(0, 1, 0, period = 12)),
+    auto_v = ARIMA(Quantity),
+    arima_logv = ARIMA(log(Quantity) ~ pdq(2, 1, 1) + PDQ(0, 1, 0, period = 12)),
+    auto_logv = ARIMA(log(Quantity))
+  )
+
+storage_fit |> t()
+```
+
+```{r}
+# Residuals
+storage_fit |>
+  select(arima_v) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Storage Residuals - No Transformation"
+  )
+
+storage_fit |>
+  select(arima_logv) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Storage Residuals - Log Transformation"
+  )
+
+# Perform a ljung-box test with sufficient lags
+storage_fit["arima_logv"] |>
+    augment() |>
+    features(.innov, c(ljung_box, box_pierce), lag = 24) |>
+    select(.model, contains("pvalue"))
+```
+
+```{r}
+# Report metrics
+glance(storage_fit) |>
+  select(.model, AICc) |>
+  left_join(
+    labels_fit |> accuracy() |> select(.model, RMSE)
+    ) |>
+  arrange(RMSE)
+```
+
+```{r}
+# Best fit (use log transformation for stationarity)
+storage_best_fit <- storage_trn |>
+  model(
+    arima_logv = ARIMA(log(Quantity) ~ pdq(2, 1, 1) + PDQ(0, 1, 0, period = 12))
+  )
+
+# Forecast best fit
+storage_fc <- storage_best_fit |>
+  forecast(h = "12 months")
+
+storage_fc |>
+  autoplot(
+    storage_trn |> filter(year(Month) >= 2014)
+    ) +
+    labs(
+      title = "Forecast of Storage - 12 Months (ARIMA)",
+      x = "Month",
+      y = "Quantity"
+      )
+```
+
+## 9) Sub-Category: Supplies
+
+```{r}
+# Supplies
+supplies_monthly <- sales_ts |>
+  filter(`Sub-Category` == "Supplies") |>
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity, na.rm = TRUE)) |>
+  tidyr::complete(Month = seq(min(Month), max(Month), by = 1),
+                  fill = list(Quantity = 0)) |>
+  as_tsibble(index = Month)
+
+# Time series plot
+supplies_monthly |>
+  autoplot(Quantity) +
+  labs(
+    title = "Supplies - Monthly Quantity",
+    x = "Month",
+    y = "Quantity"
+  )
+```
+
+```{r}
+supplies_trn <- supplies_monthly |>
+  filter(Month <= training_cutoff)
+```
+
+```{r}
+# Log transformation
+supplies_prepped <- supplies_trn |>
+  mutate(log_v = log(Quantity),
+         D12 = difference(log_v, lag = 12),
+         d1 = difference(log_v, lag = 1),
+         D12d1 = difference(D12, lag = 1))
+
+# D12d1 plot
+supplies_prepped |>
+  autoplot(D12d1)
+
+# D12d1 stationarity test
+supplies_prepped |>
+  features(D12d1, c(unitroot_kpss, unitroot_ndiffs, unitroot_nsdiffs))
+```
+
+```{r}
+# p-value showing as NaN in Supplies Quantity so we will use BoxCox instead
+supplies_lambda_bc <- supplies_trn |>
+  features(Quantity, features = guerrero) |>
+  pull(lambda_guerrero)
+
+supplies_prepped <- supplies_trn |>
+  mutate(
+    bc = box_cox(Quantity + 1, supplies_lambda_bc),
+    D12_bc = difference(bc, lag = 12),
+    d1_bc = difference(bc, lag = 1),
+    D12d1_bc = difference(D12_bc, lag = 1)
+  )
+
+# D12d1 plot
+supplies_prepped |>
+  autoplot(D12d1_bc)
+
+# D12d1 stationarity test
+supplies_prepped |>
+  features(D12d1_bc, c(unitroot_kpss, unitroot_ndiffs, unitroot_nsdiffs))
+```
+
+```{r}
+# ACF/PCF plots
+supplies_prepped |>
+  gg_tsdisplay(
+    D12d1_bc, plot_type = "partial"
+  ) +
+  labs(title = "ACF & PACF Plots - Supplies")
+```
+
+```{r}
+# Model
+supplies_fit <- supplies_trn |>
+  model(
+    arima_v = ARIMA(Quantity ~ pdq(1, 1, 1) + PDQ(0, 1, 0, period = 12)),
+    auto_v = ARIMA(Quantity),
+    arima_bcv = ARIMA(box_cox(Quantity, feasts::guerrero(Quantity)) ~
+                        pdq(1, 1, 1) + PDQ(0, 1, 0, period = 12)),
+    auto_bcv = ARIMA(box_cox(Quantity, feasts::guerrero(Quantity))
+    )
+  )
+
+supplies_fit |> t()
+```
+
+```{r}
+# Residuals
+supplies_fit |>
+  select(arima_v) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Supplies Residuals - No Transformation"
+  )
+
+supplies_fit |>
+  select(arima_bcv) |>
+  gg_tsresiduals(type = "innovation") +
+  labs(
+    title = "Supplies Residuals - BoxCox Transformation"
+  )
+
+# Perform a ljung-box test with sufficient lags
+supplies_fit["arima_bcv"] |>
+    augment() |>
+    features(.innov, c(ljung_box, box_pierce), lag = 24) |>
+    select(.model, contains("pvalue"))
+```
+
+```{r}
+# Report metrics
+glance(supplies_fit) |>
+  select(.model, AICc) |>
+  left_join(
+    fasteners_fit |> accuracy() |> select(.model, RMSE)
+    ) |>
+  arrange(RMSE)
+```
+
+```{r}
+# Best fit (use BoxCox transformation for stationarity)
+supplies_best_fit <- supplies_trn |>
+  model(
+    arima_bcv = ARIMA(box_cox(Quantity, feasts::guerrero(Quantity)) ~
+                        pdq(1, 1, 1) + PDQ(0, 1, 0, period = 12))
+  )
+
+# Forecast best fit
+supplies_fc <- supplies_best_fit |>
+  forecast(h = "12 months")
+
+supplies_fc |>
+  autoplot(
+    supplies_trn |> filter(year(Month) >= 2014)
+    ) +
+    labs(
+      title = "Forecast of Supplies - 12 Months (ARIMA)",
+      x = "Month",
+      y = "Quantity"
+      )
+```
+
+## Office Supplies Sub-Category Evaluation
+
+```{r}
+appliances_fc_metrics <- appliances_fc |>
+  accuracy(appliances_monthly) |>
+  select(.model, RMSE, MAE, MAPE) |>
+  mutate(series = "Appliances")
+
+art_fc_metrics <- art_fc |>
+  accuracy(art_monthly) |>
+  select(.model, RMSE, MAE, MAPE) |>
+  mutate(series = "Art")
+
+binders_fc_metrics <- binders_fc |>
+  accuracy(binders_monthly) |>
+  select(.model, RMSE, MAE, MAPE) |>
+  mutate(series = "Binders")
+
+envelopes_fc_metrics <- envelopes_fc |>
+  accuracy(envelopes_monthly) |>
+  select(.model, RMSE, MAE, MAPE) |>
+  mutate(series = "Envelopes")
+
+fasteners_fc_metrics <- fasteners_fc |>
+  accuracy(fasteners_monthly) |>
+  select(.model, RMSE, MAE, MAPE) |>
+  mutate(series = "Fasteners")
+
+office_metrics <- bind_rows(
+  appliances_fc |>
+    accuracy(appliances_monthly) |>
+    mutate(series = "Appliances"),
+  art_fc |>
+    accuracy(art_monthly) |>
+    mutate(series = "Art"),
+  binders_fc |>
+    accuracy(binders_monthly) |>
+    mutate(series = "Binders"),
+  envelopes_fc |>
+    accuracy(envelopes_monthly) |>
+    mutate(series = "Envelopes"),
+  fasteners_fc |>
+    accuracy(fasteners_monthly) |>
+    mutate(series = "Fasteners"),
+  labels_fc |>
+    accuracy(labels_monthly) |>
+    mutate(series = "Labels"),
+  paper_fc |>
+    accuracy(paper_monthly) |>
+    mutate(series = "Paper"),
+  storage_fc |>
+    accuracy(storage_monthly) |>
+    mutate(series = "Storage"),
+  supplies_fc |>
+    accuracy(supplies_monthly) |>
+    mutate(series = "Supplies")
+  ) |>
+  select(series, .model, RMSE, MAE, MAPE) |>
+  arrange(series, RMSE) |>
+  knitr::kable(
+        digits = 2,
+        col.names = c("Sub-Category", "Best Model", "RMSE", "MAE", "MAPE")
+        ) |>
+  kable_styling(
+        bootstrap_options = c("striped", "condensed"),
+        full_width = FALSE
+        )
+
+office_metrics
+```
+
+```{r}
+# Combine forecasts
+office_fc <- bind_rows(
+  as_tibble(appliances_fc) |> mutate(series = "Appliances"),
+  as_tibble(art_fc) |> mutate(series = "Art"),
+  as_tibble(binders_fc) |> mutate(series = "Binders"),
+  as_tibble(envelopes_fc) |> mutate(series = "Envelopes"),
+  as_tibble(fasteners_fc) |> mutate(series = "Fasteners"),
+  as_tibble(labels_fc) |> mutate(series = "Labels"),
+  as_tibble(paper_fc) |> mutate(series = "Paper"),
+  as_tibble(storage_fc) |> mutate(series = "Storage"),
+  as_tibble(supplies_fc) |> mutate(series = "Supplies")
+)
+
+# Pivot wider
+office_fc_wide <- office_fc |>
+  select(Month, series, .mean) |>
+  pivot_wider(
+    names_from = series,
+    values_from = .mean
+    ) |>
+  knitr::kable(
+    digits = 0,
+    caption = "Office Supplies Forecast Table",
+    col.names = c("Month", "Appliances", "Art", "Binders",
+                      "Envelopes", "Fasteners", "Labels",
+                      "Paper", "Storage", "Supplies")
+    ) |>
+  kable_styling(
+    bootstrap_options = c("striped", "condensed"),
+    full_width = FALSE
+    )
+
+office_fc_wide
+```
+
+```{r}
+office_subcats <- c(
+  "Appliances", "Art", "Binders", "Envelopes",
+  "Fasteners", "Labels", "Paper", "Storage", "Supplies"
+)
+
+office_supplies_monthly <- sales_ts |>
+  filter(`Sub-Category` %in% office_subcats) |>
+  group_by(`Sub-Category`) |>
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity, na.rm = TRUE)) |>
+  tidyr::complete(Month = seq(min(Month), max(Month), by = 1),
+                  fill = list(Quantity = 0)) |>
+  as_tsibble(key = `Sub-Category`, index = Month)
+
+office_supplies_monthly |> 
+  ggplot(aes(Month, Quantity)) +
+  geom_line() +
+  facet_wrap(~ `Sub-Category`, scales = "free_y") +
+  labs(
+    title = "Quantity of Office Supplies Sub-Categories (2014-2017)",
+    x = "Month",
+    y = "Quantity"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+office_fc |>
+  ggplot(aes(x = Month, y = .mean)) +
+  geom_line() +
+  facet_wrap(~ series, scales = "free_y") +
+  labs(
+    title = "Forecasts for Office Supply - 2017",
+    x = "Month",
+    y = "Forecasted Quantity"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Category: Furniture
+
+## 1) Sub-Category
+
+```{r}
+# Tsibble with all Sub-Categories
+sales_subcat_ts <- sales |> 
+  group_by(`Sub-Category`, `Order Date`) |>
+  summarise(Quantity = sum(Quantity), .groups = "drop") |>
+  as_tsibble(
+    key = `Sub-Category`,
+    index = `Order Date`
+  )
+```
+
+## 2) Visualize Top Furniture Sub-Categories: Chairs, Tables, Bookcases, Furnishings
+
+```{r}
+furn_subcats <- c("Chairs", "Tables", "Bookcases", "Furnishings")
+furn_subcat_ts <- sales_subcat_ts |>
+  filter(`Sub-Category` %in% furn_subcats) |>
+  group_by(`Sub-Category`) |>                     # retain sub-category
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity), .groups = "drop") |>
+  fill_gaps(Quantity = 0)
+
+furn_subcat_ts |> 
+  ggplot(aes(x = Month, y = Quantity)) +
+  geom_line() +
+  facet_wrap(~ `Sub-Category`, scales = "free_y") +
+  labs(title = "Monthly Sold Quantity for Top Furniture Sub-Categories",
+       x = "Month",
+       y = "Quantity Sold")
+```
+
+## 3) Visualize Decomposition of Top Furniture Sub-Categories: Chairs, Tables, Bookcases, Furnishings
+
+```{r}
+furn_subcat_decomp <- furn_subcat_ts |>
+  model(STL(Quantity)) |> 
+  components()
+
+# Define the components to plot
+plot_cols <- c("Quantity", "trend", "season_year", "remainder", "season_adjust")
+plot_cols <- intersect(plot_cols, names(furn_subcat_decomp))
+
+p <- furn_subcat_decomp |>
+  pivot_longer(cols = all_of(plot_cols), names_to = "component", values_to = "value") |>
+  mutate(component = factor(component, levels = plot_cols)) |>
+  ggplot(aes(x = Month, y = value)) +
+  geom_line(color = "steelblue") +
+  facet_grid(rows = vars(component), cols = vars(`Sub-Category`), scales = "free_y", switch = "y") +
+  labs(
+    title = "STL Components by Sub-Category",
+    x = "Month",
+    y = "Value"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+p
+```
+
+## 4) Visualize Decomposition of Top Furniture Sub-Categories: Chairs, Tables, Bookcases, Furnishings, removing season_adjust and reminder
+
+```{r}
+furn_subcat_decomp <- furn_subcat_ts |>
+  model(STL(Quantity)) |> 
+  components()
+
+# Define the components to plot
+plot_cols <- c("Quantity", "trend", "season_year")
+plot_cols <- intersect(plot_cols, names(furn_subcat_decomp))
+
+p <- furn_subcat_decomp |>
+  pivot_longer(cols = all_of(plot_cols), names_to = "component", values_to = "value") |>
+  mutate(component = factor(component, levels = plot_cols)) |>
+  ggplot(aes(x = Month, y = value)) +
+  geom_line(color = "steelblue") +
+  facet_grid(rows = vars(component), cols = vars(`Sub-Category`), scales = "free_y", switch = "y") +
+  labs(
+    title = "Furniture Top Sub-Categories Analysis",
+    x = "Month",
+    y = "Value"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+p
+
+```
+
+## 5) Visualize Autocorrelation/Seasonality Checking of Top Furniture Sub-Categories: Chairs, Tables, Bookcases, Furnishings
+
+```{r}
+furn_subcat_ts |>
+  filter(`Sub-Category` == "Chairs") |>
+  gg_tsdisplay(Quantity) +
+  labs(title = "Autocorrelation / Seasonality — Chairs")
+
+furn_subcat_ts |>
+  filter(`Sub-Category` == "Tables") |>
+  gg_tsdisplay(Quantity) +
+  labs(title = "Autocorrelation / Seasonality — Tables")
+
+furn_subcat_ts |>
+  filter(`Sub-Category` == "Bookcases") |>
+  gg_tsdisplay(Quantity) +
+  labs(title = "Autocorrelation / Seasonality — Bookcases")
+
+furn_subcat_ts |>
+  filter(`Sub-Category` == "Furnishings") |>
+  gg_tsdisplay(Quantity) +
+  labs(title = "Autocorrelation / Seasonality — Furnishings")
+```
+
+## 6) Checking Differencing needed of Top Furniture Sub-Categories: Chairs, Tables, Bookcases, Furnishings
+
+```{r}
+furn_subcat_ts |> 
+  group_by(`Sub-Category`) |>
+  features(Quantity, c(unitroot_kpss, unitroot_ndiffs, unitroot_nsdiffs)) 
+```
+
+## 7) Checking Transformation needed of Top Furniture Sub-Categories: Chairs, Tables, Bookcases, Furnishings
+
+```{r}
+# Compute Guerrero lambda (Box–Cox) for each furniture sub-category
+furn_lambdas <- furn_subcat_ts |>
+  group_by(`Sub-Category`) |>
+  features(Quantity, features = guerrero) |>
+  select(`Sub-Category`, lambda_guerrero)
+furn_lambdas
+```
+
+## 8) Forecasting Top Furniture Sub-Categories: Chairs, Tables, Bookcases, Furnishings
+
+```{r}
+# Forecasting top furniture sub-categories (Chairs, Tables, Bookcases, Furnishings)
+furn_trn <- furn_subcat_ts |>
+  group_by(`Sub-Category`) |>
+  filter(Month <= yearmonth(as_date(max(Month)) - years(1)))
+
+# optional: per-subcategory cutoff table
+furn_trn_cutoffs <- furn_subcat_ts |>
+  group_by(`Sub-Category`) |>
+  summarize(trn_cutoff = yearmonth(as_date(max(Month)) - years(1)), .groups = "drop")
+
+furn_trn_fit <- furn_trn |>
+  model(
+    arima_log1p = ARIMA(log1p(Quantity)),
+    arima_sqrt  = ARIMA(sqrt(Quantity)),
+    arima_v     = ARIMA(Quantity),
+    ets_log1p   = ETS(log1p(Quantity)),
+    ets_sqrt    = ETS(sqrt(Quantity)),
+    ets_v       = ETS(Quantity),
+    tslm_log1p  = TSLM(log1p(Quantity) ~ trend() + season()),
+    tslm_sqrt   = TSLM(sqrt(Quantity)~ trend() + season()),
+    tslm_v      = TSLM(Quantity       ~ trend() + season())
+  ) |>
+  mutate(combo = (arima_log1p + ets_log1p + tslm_log1p) / 3)
+
+furn_trn_fc <- furn_trn_fit |> forecast(h = "1 year")
+
+# Accuracy against full observed series, drop rows with missing metrics
+furn_metrics <- furn_trn_fc |>
+  accuracy(furn_subcat_ts) |>
+  filter(!is.na(RMSE)) |>
+  arrange(`Sub-Category`, RMSE) |>
+  select(`Sub-Category`, .model, RMSE:MAPE)
+
+furn_metrics_tbl <- furn_metrics |>
+  gt::gt() |>
+  gt::fmt_number(columns = c("RMSE", "MAE", "MAPE"), decimals = 1) |>
+  gt::tab_header(
+    title = "1-year Forecast Metrics — Top Furniture Sub-Categories",
+    subtitle = "Training cutoff = 1 year before each sub-category's last observation"
+  )
+
+furn_metrics_tbl
+```
+
+## 9) Plot Forecasting Top Furniture Sub-Categories: Chairs, Tables, Bookcases, Furnishings
+
+```{r}
+
+# plotting (returns ggplot object)
+furn_plot <- furn_trn_fc |>
+  autoplot(.vars = ".mean", level = 95) +
+  autolayer(furn_subcat_ts, .vars = Quantity, color = "lightgray") +
+  facet_wrap(~ .model) +
+  labs(
+    title = "1-year Forecasts for Top Furniture Sub-Categories",
+    y = "Quantity",
+    x = "Month"
+  )
+
+# return useful objects
+list(
+  metrics_tbl = furn_metrics_tbl,
+  plot = furn_plot
+)
+
+```
+
+## 10) Forecast top furniture sub-categories — separate mables for ARIMA / ETS / TSLM with Box–Cox
+
+```{r}
+
+# 1) Per-group Guerrero lambdas
+furn_lambdas <- furn_subcat_ts |>
+  group_by(`Sub-Category`) |>
+  features(Quantity, features = guerrero) |>
+  select(`Sub-Category`, lambda_guerrero)
+
+# 2) Train set (ungroup before join)
+furn_trn <- furn_subcat_ts |>
+  group_by(`Sub-Category`) |>
+  filter(Month <= yearmonth(as_date(max(Month)) - years(1))) |>
+  ungroup() |>
+  left_join(furn_lambdas, by = "Sub-Category") |>
+  as_tsibble(key = `Sub-Category`, index = Month)
+
+# 3a) Non-Box-Cox mable (response = Quantity)
+fit_nbc <- furn_trn |>
+  model(
+    arima_log1p = ARIMA(log1p(Quantity)),
+    arima_sqrt  = ARIMA(sqrt(Quantity)),
+    arima_v     = ARIMA(Quantity),
+    ets_log1p   = ETS(log1p(Quantity)),
+    ets_sqrt    = ETS(sqrt(Quantity)),
+    ets_v       = ETS(Quantity),
+    tslm_log1p  = TSLM(log1p(Quantity) ~ trend() + season()),
+    tslm_sqrt   = TSLM(sqrt(Quantity)~ trend() + season()),
+    tslm_v      = TSLM(Quantity       ~ trend() + season())
+  ) |>
+  mutate(combo = (arima_log1p + ets_log1p + tslm_log1p) / 3)
+
+# 3b) BOX–COX mable (response = box_cox(Quantity, lambda_guerrero))
+fit_bc <- furn_trn |>
+  model(
+    arima_bc = ARIMA(box_cox(Quantity, feasts::guerrero(Quantity))),
+    ets_bc   = ETS(box_cox(Quantity, feasts::guerrero(Quantity))),
+    tslm_bc  = TSLM(box_cox(Quantity, feasts::guerrero(Quantity)) ~ trend() + season())
+  ) |>
+  mutate(combo_bc = (arima_bc + ets_bc + tslm_bc) / 3)
+
+# 4) Forecasts (h = 1 year)
+fc_nbc  <- fit_nbc  |> forecast(h = "1 year")
+fc_bc <- fit_bc |> forecast(h = "1 year")
+
+
+# create Box–Cox truth (matching fit_bc response)
+furn_subcat_ts_bc <- furn_subcat_ts |>
+  ungroup() |>
+  left_join(furn_lambdas, by = "Sub-Category") |>
+  mutate(Quantity_bc = fabletools::box_cox(Quantity, lambda_guerrero)) |>
+  as_tsibble(key = `Sub-Category`, index = Month)
+
+# compute accuracy separately (use transformed truth for boxcox)
+metrics_v  <- fc_nbc  |> accuracy(furn_subcat_ts)    |> filter(!is.na(RMSE)) |> mutate(transform = "non-boxcox")
+metrics_bc <- fc_bc |> accuracy(furn_subcat_ts_bc) |> filter(!is.na(RMSE)) |> mutate(transform = "boxcox")
+
+# combine metrics and make a gt table
+metrics_combined <- dplyr::bind_rows(metrics_v, metrics_bc) |>
+  dplyr::arrange(`Sub-Category`, RMSE)
+
+metrics_combined_tbl <- metrics_combined |>
+  dplyr::select(`Sub-Category`, .model, transform, RMSE:MAPE) |>
+  gt::gt() |>
+  gt::fmt_number(columns = RMSE:MAPE, decimals = 1) |>
+  gt::tab_header(
+    title = "1-year Forecast Metrics — Top Furniture Sub-Categories",
+    subtitle = "Non Box-Cox and Per-group Guerrero Box–Cox"
+  )
+
+# return useful objects
+list(
+  metrics_combined_tbl = metrics_combined_tbl
+)
+```
+
+## 11) Best model Metrics: Forecast ets_log1p for Bookcases and Furnishings sub-category only, tslm_bc for Chairs and Tables sub-categories only
+
+```{r}
+best_models <- metrics_combined |>
+  filter(
+    (`Sub-Category` == "Bookcases"   & .model == "ets_log1p")  |
+    (`Sub-Category` == "Chairs"      & .model == "tslm_bc")     |
+    (`Sub-Category` == "Furnishings" & .model == "ets_log1p")  |
+    (`Sub-Category` == "Tables"      & .model == "tslm_bc")
+  )
+best_models_tbl <- best_models |>
+  gt::gt() |>
+  gt::fmt_number(decimals = 2) |>
+  gt::tab_header(
+    title = "Best 1-year Forecast Metrics — Top Furniture Sub-Categories",
+    subtitle = "Bookcases and Furnishings (ETS), with log1p vs. Chairs and Tables (TSLM), with Box–Cox"
+  )
+best_models_tbl
+```
+
+The best models for forecasting top subcategories in Furniture were ETS with log1p transformation for Bookcases and Furnishings and TSLM with box-cox transformation for Chairs and Tables.
+
+## 12) Best model Plot: Forecast ets_log1p for Bookcases and Furnishings sub-category only, tslm_bc for Chairs and Tables sub-categories only
+
+```{r}
+best_fc <- dplyr::bind_rows(
+  fc_bc  |> filter(`Sub-Category` %in% c("Chairs", "Tables") & .model == "tslm_bc"),
+  fc_nbc |> filter(`Sub-Category` %in% c("Bookcases", "Furnishings") & .model == "ets_log1p")
+) 
+best_fc_plot <- best_fc |>
+  autoplot(level = c(80, 95)) +
+  autolayer(furn_subcat_ts, color = "lightgray") +
+  facet_wrap(~ `Sub-Category`) +
+  labs(
+    title = "Best 1-year Forecasts for Top Furniture Sub-Categories",
+    y = "Quantity",
+    x = "Month"
+  )
+best_fc_plot
+```
+
+# Category: Technology
+
+## 1) Filter and create tsibble for Technology Sub-Categories: Phones, Accessories, Machines, Copiers
+
+```{r}
+tech_subcats <- c("Phones", "Accessories", "Machines", "Copiers")
+tech_subcat_ts <- sales_subcat_ts |>
+  filter(`Sub-Category` %in% tech_subcats) |>
+  group_by(`Sub-Category`) |>                     # retain sub-category
+  index_by(Month = yearmonth(`Order Date`)) |>
+  summarise(Quantity = sum(Quantity), .groups = "drop") |>
+  fill_gaps(Quantity = 0)
+
+tech_subcat_ts
+```
+
+## 2) Visualize Technology Sub-Categories: Phones, Accessories, Machines, Copiers
+
+```{r}
+tech_subcat_ts |> 
+  ggplot(aes(x = Month, y = Quantity)) +
+  geom_line(color = "steelblue") +
+  facet_grid(rows = vars(`Sub-Category`), scales = "free_y") +
+  labs(
+    title = "Technology Sub-Categories — Monthly Quantity Sold",
+    x = "Month",
+    y = "Quantity"
+  ) 
+```
+
+## 3) Visualize Decomposition of Technology Sub-Categories: Phones, Accessories, Machines, Copiers, including all components
+
+```{r}
+tech_subcat_decomp <- tech_subcat_ts |>
+  model(STL(Quantity)) |> 
+  components()
+
+# Define the components to plot
+plot_cols <- c("Quantity", "trend", "season_year", "remainder", "season_adjust")
+plot_cols <- intersect(plot_cols, names(tech_subcat_decomp))
+
+p <- tech_subcat_decomp |>
+  pivot_longer(cols = all_of(plot_cols), names_to = "component", values_to = "value") |>
+  mutate(component = factor(component, levels = plot_cols)) |>
+  ggplot(aes(x = Month, y = value)) +
+  geom_line(color = "steelblue") +
+  facet_grid(rows = vars(component), cols = vars(`Sub-Category`), scales = "free_y", switch = "y") +
+  labs(
+    title = "STL Components by Sub-Category",
+    x = "Month",
+    y = "Value"
+  ) 
+
+p
+```
+
+## 4) Visualize Decomposition of Technology Sub-Categories: Phones, Accessories, Machines, Copiers, removing season_adjust and remainder
+
+```{r}
+tech_subcat_decomp <- tech_subcat_ts |>
+  model(STL(Quantity)) |> 
+  components()
+
+# Define the components to plot
+plot_cols <- c("Quantity", "trend", "season_year")
+plot_cols <- intersect(plot_cols, names(tech_subcat_decomp))
+
+p <- tech_subcat_decomp |>
+  pivot_longer(cols = all_of(plot_cols), names_to = "component", values_to = "value") |>
+  mutate(component = factor(component, levels = plot_cols)) |>
+  ggplot(aes(x = Month, y = value)) +
+  geom_line(color = "steelblue") +
+  facet_grid(rows = vars(component), cols = vars(`Sub-Category`), scales = "free_y", switch = "y") +
+  labs(
+    title = "Technology Sub-Categories Analysis",
+    x = "Month",
+    y = "Value"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+p
+```
+
+## 5) Visualize Autocorrelation/Seasonality Checking of Technology Sub-Categories: Phones, Accessories, Machines, Copiers
+
+```{r}
+tech_subcat_ts |>
+  filter(`Sub-Category` == "Phones") |>
+  gg_tsdisplay(Quantity) +
+  labs(title = "Autocorrelation / Seasonality — Phones")
+
+tech_subcat_ts |>
+  filter(`Sub-Category` == "Accessories") |>
+  gg_tsdisplay(Quantity) +
+  labs(title = "Autocorrelation / Seasonality — Accessories")
+
+tech_subcat_ts |>
+  filter(`Sub-Category` == "Machines") |>
+  gg_tsdisplay(Quantity) +
+  labs(title = "Autocorrelation / Seasonality — Machines")
+
+tech_subcat_ts |>
+  filter(`Sub-Category` == "Copiers") |>
+  gg_tsdisplay(Quantity) +
+  labs(title = "Autocorrelation / Seasonality — Copiers")
+```
+
+## 6) Checking Differencing needed of Technology Sub-Categories: Phones, Accessories, Machines, Copiers
+
+```{r}
+tech_subcat_ts |> 
+  group_by(`Sub-Category`) |>
+  features(Quantity, c(unitroot_kpss, unitroot_ndiffs, unitroot_nsdiffs)) 
+```
+
+## 7) Checking Transformation needed of Technology Sub-Categories: Phones, Accessories, Machines, Copiers
+
+```{r}
+# Compute Box–Cox for each technology sub-category
+tech_lambdas <- tech_subcat_ts |>
+  group_by(`Sub-Category`) |>
+  features(Quantity, features = guerrero) |>
+  select(`Sub-Category`, lambda_guerrero)
+tech_lambdas
+```
+
+## 8) Forecasting Technology Sub-Categories: Phones, Accessories, Machines, Copiers
+
+```{r}
+# Forecasting technology sub-categories (Phones, Accessories, Machines, Copiers)
+tech_trn <- tech_subcat_ts |>
+  group_by(`Sub-Category`) |>
+  filter(Month <= yearmonth(as_date(max(Month)) - years(1)))
+
+# optional: per-subcategory cutoff table
+tech_trn_cutoffs <- tech_subcat_ts |>
+  group_by(`Sub-Category`) |>
+  summarize(trn_cutoff = yearmonth(as_date(max(Month)) - years(1)), .groups = "drop")
+
+tech_trn_fit <- tech_trn |>
+  model(
+    arima_log1p = ARIMA(log1p(Quantity)),
+    arima_sqrt  = ARIMA(sqrt(Quantity)),
+    arima_v     = ARIMA(Quantity),
+    ets_log1p   = ETS(log1p(Quantity)),
+    ets_sqrt    = ETS(sqrt(Quantity)),
+    ets_v       = ETS(Quantity),
+    tslm_log1p  = TSLM(log1p(Quantity) ~ trend() + season()),
+    tslm_sqrt   = TSLM(sqrt(Quantity)~ trend() + season()),
+    tslm_v      = TSLM(Quantity       ~ trend() + season())
+  ) |>
+  mutate(combo = (arima_log1p + ets_log1p + tslm_log1p) / 3)
+
+tech_trn_fc <- tech_trn_fit |> forecast(h = "1 year")
+
+# Accuracy against full observed series, drop rows with missing metrics
+tech_metrics <- tech_trn_fc |>
+  accuracy(tech_subcat_ts) |>
+  filter(!is.na(RMSE)) |>
+  arrange(`Sub-Category`, RMSE) |>
+  select(`Sub-Category`, .model, RMSE:MAPE)
+
+tech_metrics_tbl <- tech_metrics |>
+  gt::gt() |>
+  gt::fmt_number(columns = c("RMSE", "MAE", "MAPE"), decimals = 1) |>
+  gt::tab_header(
+    title = "1-year Forecast Metrics — Technology Sub-Categories",
+    subtitle = "Training cutoff = 1 year before each sub-category's last observation"
+  )
+
+tech_metrics_tbl
+```
+
+## 9) Plot Forecasting Technology Sub-Categories: Phones, Accessories, Machines, Copiers
+
+```{r}
+
+# plotting (returns ggplot object)
+tech_plot <- tech_trn_fc |>
+  autoplot(.vars = ".mean", level = 95) +
+  autolayer(tech_subcat_ts, .vars = Quantity, color = "lightgray") +
+  facet_wrap(~ .model) +
+  labs(
+    title = "1-year Forecasts for Technology Sub-Categories",
+    y = "Quantity",
+    x = "Month"
+  )
+
+# return useful objects
+list(
+  metrics_tbl = tech_metrics_tbl,
+  plot = tech_plot
+)
+
+```
+
+## 10) Forecast technology sub-categories — separate mables for ARIMA / ETS / TSLM with Box–Cox
+
+```{r}
+# 1) Per-group Box Cox
+tech_lambdas <- tech_subcat_ts |>
+  group_by(`Sub-Category`) |>
+  features(Quantity, features = guerrero) |>
+  select(`Sub-Category`, lambda_guerrero)
+
+# 2) Train set (ungroup before join)
+tech_trn <- tech_subcat_ts |>
+  group_by(`Sub-Category`) |>
+  filter(Month <= yearmonth(as_date(max(Month)) - years(1))) |>
+  ungroup() |>
+  left_join(tech_lambdas, by = "Sub-Category") |>
+  as_tsibble(key = `Sub-Category`, index = Month)
+
+# 3a) Non-Box-Cox mable (response = Quantity)
+fit_nbc <- tech_trn |>
+  model(
+    arima_log1p = ARIMA(log1p(Quantity)),
+    arima_sqrt  = ARIMA(sqrt(Quantity)),
+    arima_v     = ARIMA(Quantity),
+    ets_log1p   = ETS(log1p(Quantity)),
+    ets_sqrt    = ETS(sqrt(Quantity)),
+    ets_v       = ETS(Quantity),
+    tslm_log1p  = TSLM(log1p(Quantity) ~ trend() + season()),
+    tslm_sqrt   = TSLM(sqrt(Quantity)~ trend() + season()),
+    tslm_v      = TSLM(Quantity       ~ trend() + season())
+  ) |>
+  mutate(combo = (arima_log1p + ets_log1p + tslm_log1p) / 3)
+
+# 3b) BOX–COX mable (response = box_cox(Quantity, lambda_guerrero))
+fit_bc <- tech_trn |>
+  model(
+    arima_bc = ARIMA(box_cox(Quantity, feasts::guerrero(Quantity))),
+    ets_bc   = ETS(box_cox(Quantity, feasts::guerrero(Quantity))),
+    tslm_bc  = TSLM(box_cox(Quantity, feasts::guerrero(Quantity)) ~ trend() + season())
+  ) |>
+  mutate(combo_bc = (arima_bc + ets_bc + tslm_bc) / 3)
+
+# 4) Forecasts (h = 1 year)
+fc_nbc  <- fit_nbc  |> forecast(h = "1 year")
+fc_bc <- fit_bc |> forecast(h = "1 year")
+
+
+# create Box–Cox truth (matching fit_bc response)
+tech_subcat_ts_bc <- tech_subcat_ts |>
+  ungroup() |>
+  left_join(tech_lambdas, by = "Sub-Category") |>
+  mutate(Quantity_bc = fabletools::box_cox(Quantity, lambda_guerrero)) |>
+  as_tsibble(key = `Sub-Category`, index = Month)
+
+# compute accuracy separately (use transformed truth for boxcox)
+metrics_v  <- fc_nbc  |> accuracy(tech_subcat_ts)    |> filter(!is.na(RMSE)) |> mutate(transform = "non-boxcox")
+metrics_bc <- fc_bc |> accuracy(tech_subcat_ts_bc) |> filter(!is.na(RMSE)) |> mutate(transform = "boxcox")
+
+# combine metrics and make a gt table
+metrics_combined <- dplyr::bind_rows(metrics_v, metrics_bc) |>
+  dplyr::arrange(`Sub-Category`, RMSE)
+
+metrics_combined_tbl <- metrics_combined |>
+  dplyr::select(`Sub-Category`, .model, transform, RMSE:MAPE) |>
+  gt::gt() |>
+  gt::fmt_number(columns = RMSE:MAPE, decimals = 1) |>
+  gt::tab_header(
+    title = "1-year Forecast Metrics — Technology Sub-Categories",
+    subtitle = "Non Box-Cox and Per-group Guerrero Box–Cox"
+  )
+
+# return useful objects
+list(
+  metrics_combined_tbl = metrics_combined_tbl
+)
+```
+
+## 11) Best model Metrics: Identify and display best models for each Technology sub-category
+
+```{r}
+# Identify best model for each sub-category (lowest RMSE)
+best_tech_models <- metrics_combined |>
+  group_by(`Sub-Category`) |>
+  slice_min(RMSE, n = 1) |>
+  ungroup()
+
+best_tech_models_tbl <- best_tech_models |>
+  gt::gt() |>
+  gt::fmt_number(decimals = 2) |>
+  gt::tab_header(
+    title = "Best 1-year Forecast Metrics — Technology Sub-Categories",
+    subtitle = "Lowest RMSE for each sub-category"
+  )
+best_tech_models_tbl
+```
+
+## 12) Best model Plot: Forecast best models for Technology sub-categories
+
+```{r}
+# Create a key to match the best models to the correct forecast objects
+best_models_info <- best_tech_models |>
+  select(`Sub-Category`, .model, transform)
+
+# Filter forecasts for best models
+best_tech_fc <- dplyr::bind_rows(
+  fc_bc  |> 
+    inner_join(best_models_info |> filter(transform == "boxcox"), 
+               by = c("Sub-Category", ".model")),
+  fc_nbc |> 
+    inner_join(best_models_info |> filter(transform == "non-boxcox"), 
+               by = c("Sub-Category", ".model"))
+) 
+
+best_tech_fc_plot <- best_tech_fc |>
+  autoplot(level = c(80, 95)) +
+  autolayer(tech_subcat_ts, color = "lightgray") +
+  facet_wrap(~ `Sub-Category`, scales = "free_y") +
+  labs(
+    title = "Best 1-year Forecasts for Technology Sub-Categories",
+    y = "Quantity",
+    x = "Month"
+  )
+best_tech_fc_plot
+```
+
+## Model Evaluation
+
+```{r}
+# Best models per sub-category
+best_office_models <- bind_rows(
+  appliances_fc |>
+    accuracy(appliances_monthly) |>
+    mutate(series = "Appliances"),
+  art_fc |>
+    accuracy(art_monthly) |>
+    mutate(series = "Art"),
+  binders_fc |>
+    accuracy(binders_monthly) |>
+    mutate(series = "Binders"),
+  envelopes_fc |>
+    accuracy(envelopes_monthly) |>
+    mutate(series = "Envelopes"),
+  fasteners_fc |>
+    accuracy(fasteners_monthly) |>
+    mutate(series = "Fasteners"),
+  labels_fc |>
+    accuracy(labels_monthly) |>
+    mutate(series = "Labels"),
+  paper_fc |>
+    accuracy(paper_monthly) |>
+    mutate(series = "Paper"),
+  storage_fc |>
+    accuracy(storage_monthly) |>
+    mutate(series = "Storage"),
+  supplies_fc |>
+    accuracy(supplies_monthly) |>
+    mutate(series = "Supplies")
+  )
+
+best_office_models <- best_office_models |>
+  rename(`Sub-Category` = series) |>
+  relocate(`Sub-Category`, .after = 1) |>
+  mutate(transform = c("none", "log", "log", "boxcox", "boxcox", "log", "log", "log", "boxcox"))
+
+combined_models <- bind_rows(
+  best_office_models,
+  best_models,
+  best_tech_models
+)
+
+combined_models
+```
+
+```{r}
+# Forecasts
+office_fc <- bind_rows(
+  as_tibble(appliances_fc)  |> mutate(`Sub-category` = "Appliances"),
+  as_tibble(art_fc)         |> mutate(`Sub-category` = "Art"),
+  as_tibble(binders_fc)     |> mutate(`Sub-category` = "Binders"),
+  as_tibble(envelopes_fc)   |> mutate(`Sub-category` = "Envelopes"),
+  as_tibble(fasteners_fc)   |> mutate(`Sub-category` = "Fasteners"),
+  as_tibble(labels_fc)      |> mutate(`Sub-category` = "Labels"),
+  as_tibble(paper_fc)       |> mutate(`Sub-category` = "Paper"),
+  as_tibble(storage_fc)     |> mutate(`Sub-category` = "Storage"),
+  as_tibble(supplies_fc)    |> mutate(`Sub-category` = "Supplies")
+  ) |>
+  rename(`Sub-Category` = `Sub-category`) |>
+  select(`Sub-Category`, .model, Month, Quantity, .mean, everything())
+
+all_fc <- bind_rows(
+  best_fc        |> mutate(`Category` = "Furniture"),
+  best_tech_fc   |> mutate(`Category` = "Technologoy"),
+  office_fc      |> mutate(`Category` = "Office Supplies")
+)
+```
+
+```{r, fig.width=14, fig.height=14}
+all_fc_plot <- all_fc |>
+  autoplot(level = c(80, 95)) +
+  facet_wrap(~ `Sub-Category`, ncol = 4) +
+  labs(
+    title = "1-year Forecasts for All Sub-Categories",
+    y = "Quantity",
+    x = "Month"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+all_fc_plot
+```
+
+```{r, fig.width=14, fig.height=14}
+all_fc_plot <- all_fc |>
+  autoplot(level = c(80, 95)) +
+  facet_wrap(~ `Sub-Category`, scales = "free_y",  ncol = 4) +
+  labs(
+    title = "1-year Forecasts for All Sub-Categories",
+    y = "Quantity",
+    x = "Month"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+all_fc_plot
+```
